@@ -157,9 +157,12 @@ Output binaries:
 ## Author & Contact
 
 Developed by **Anish Goswami (Goldee)**  
-Email: [anishgoswami98@gmail.com](mailto:anishgoswami98@gmail.com)  
-GitHub: [@TheGoldeeWay](https://github.com/TheGoldeeWay)  
-Project Repository: [https://github.com/TheGoldeeWay/vlive](https://github.com/TheGoldeeWay/vlive)
+- **Email**: [anishgoswami98@gmail.com](mailto:anishgoswami98@gmail.com)  
+- **GitHub**: [@TheGoldeeWay](https://github.com/TheGoldeeWay)  
+- **YouTube**: [@thegoldeeway](https://youtube.com/@thegoldeeway)  
+- **Instagram**: [@goldeemusic](https://www.instagram.com/goldeemusic)  
+- **LinkedIn**: [in/goldee](https://www.linkedin.com/in/goldee)  
+- **Project Repository**: [https://github.com/TheGoldeeWay/vlive](https://github.com/TheGoldeeWay/vlive)
 
 ---
 
