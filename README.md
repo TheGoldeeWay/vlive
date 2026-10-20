@@ -158,7 +158,7 @@ Output binaries:
 
 Developed by **Anish Goswami (Goldee)**  
 Email: [anishgoswami98@gmail.com](mailto:anishgoswami98@gmail.com)  
-GitHub: [@blaze8486](https://github.com/blaze8486) / [@TheGoldeeWay](https://github.com/TheGoldeeWay)  
+GitHub: [@TheGoldeeWay](https://github.com/TheGoldeeWay)  
 Project Repository: [https://github.com/TheGoldeeWay/vlive](https://github.com/TheGoldeeWay/vlive)
 
 ---
