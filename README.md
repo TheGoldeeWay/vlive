@@ -1,8 +1,8 @@
 # VLive — Standalone Virtual Studio MIDI Controller System
 
-[![Release](https://img.shields.io/badge/Release-v2.0.0-00ffcc?style=flat-square&logo=github)](https://github.com/blaze8486/vlive/releases/tag/v2.0.0)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011%20x64-0078d4?style=flat-square&logo=windows)](https://github.com/blaze8486/vlive/releases/latest)
-[![C++](https://img.shields.io/badge/Standard-C%2B%2B20%20(Static%20%2FMT)-f34b7d?style=flat-square&logo=cplusplus)](https://github.com/blaze8486/vlive)
+[![Release](https://img.shields.io/badge/Release-v2.0.0-00ffcc?style=flat-square&logo=github)](https://github.com/TheGoldeeWay/vlive/releases/tag/v2.0.0)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011%20x64-0078d4?style=flat-square&logo=windows)](https://github.com/TheGoldeeWay/vlive/releases/latest)
+[![C++](https://img.shields.io/badge/Standard-C%2B%2B20%20(Static%20%2FMT)-f34b7d?style=flat-square&logo=cplusplus)](https://github.com/TheGoldeeWay/vlive)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
 **VLive** is a professional, high-performance virtual MIDI controller and live performance ecosystem engineered for sub-millisecond stage responsiveness, multi-performer synchronization, and instant DAW integration on Windows.
@@ -13,16 +13,16 @@ VLive is **100% standalone and software-based**: it creates an in-process native
 
 ## 🚀 Downloads (Latest Release v2.0.0)
 
-Grab the turnkey Windows distribution directly from the [Releases Page](https://github.com/blaze8486/vlive/releases/latest):
+Grab the turnkey Windows distribution directly from the [Releases Page](https://github.com/TheGoldeeWay/vlive/releases/latest):
 
 | Package | Format | Description | Direct Download |
 | :--- | :--- | :--- | :--- |
-| **VLive Turnkey Installer** | `.exe` (~3.7 MB) | Automatic installer with driver auto-configuration & firewall registration | [VLive_Setup_x64.exe](https://github.com/blaze8486/vlive/releases/download/v2.0.0/VLive_Setup_x64.exe) |
-| **VLive Portable Package** | `.zip` (~4.1 MB) | Zero-install portable edition ready for USB sticks & stage laptops | [VLive_v2.0.0_Portable_x64.zip](https://github.com/blaze8486/vlive/releases/download/v2.0.0/VLive_v2.0.0_Portable_x64.zip) |
-| **VLive Complete Distribution** | `.zip` (~11.4 MB) | Full bundle containing installer, portable exe, drivers, and user manual | [VLive_v2.0.0_Final_Distribution_x64.zip](https://github.com/blaze8486/vlive/releases/download/v2.0.0/VLive_v2.0.0_Final_Distribution_x64.zip) |
-| **Official User Manual** | `.pdf` (~750 KB) | Comprehensive setup, network tuning & DAW connection manual | [VLive_User_Manual.pdf](https://github.com/blaze8486/vlive/releases/download/v2.0.0/VLive_User_Manual.pdf) |
+| **VLive Turnkey Installer** | `.exe` (~3.7 MB) | Automatic installer with driver auto-configuration & firewall registration | [VLive_Setup_x64.exe](https://github.com/TheGoldeeWay/vlive/releases/download/v2.0.0/VLive_Setup_x64.exe) |
+| **VLive Portable Package** | `.zip` (~4.1 MB) | Zero-install portable edition ready for USB sticks & stage laptops | [VLive_v2.0.0_Portable_x64.zip](https://github.com/TheGoldeeWay/vlive/releases/download/v2.0.0/VLive_v2.0.0_Portable_x64.zip) |
+| **VLive Complete Distribution** | `.zip` (~11.4 MB) | Full bundle containing installer, portable exe, drivers, and user manual | [VLive_v2.0.0_Final_Distribution_x64.zip](https://github.com/TheGoldeeWay/vlive/releases/download/v2.0.0/VLive_v2.0.0_Final_Distribution_x64.zip) |
+| **Official User Manual** | `.pdf` (~750 KB) | Comprehensive setup, network tuning & DAW connection manual | [VLive_User_Manual.pdf](https://github.com/TheGoldeeWay/vlive/releases/download/v2.0.0/VLive_User_Manual.pdf) |
 
-Verify file authenticity with [`checksums.sha256`](https://github.com/blaze8486/vlive/releases/download/v2.0.0/checksums.sha256).
+Verify file authenticity with [`checksums.sha256`](https://github.com/TheGoldeeWay/vlive/releases/download/v2.0.0/checksums.sha256).
 
 ---
 
@@ -158,8 +158,8 @@ Output binaries:
 
 Developed by **Anish Goswami (Goldee)**  
 Email: [anishgoswami98@gmail.com](mailto:anishgoswami98@gmail.com)  
-GitHub: [@blaze8486](https://github.com/blaze8486)  
-Project Repository: [https://github.com/blaze8486/vlive](https://github.com/blaze8486/vlive)
+GitHub: [@blaze8486](https://github.com/blaze8486) / [@TheGoldeeWay](https://github.com/TheGoldeeWay)  
+Project Repository: [https://github.com/TheGoldeeWay/vlive](https://github.com/TheGoldeeWay/vlive)
 
 ---
 
