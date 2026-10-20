@@ -3,9 +3,12 @@
 [![Release](https://img.shields.io/badge/Release-v2.0.0-00ffcc?style=flat-square&logo=github)](https://github.com/TheGoldeeWay/vlive/releases/tag/v2.0.0)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011%20x64-0078d4?style=flat-square&logo=windows)](https://github.com/TheGoldeeWay/vlive/releases/latest)
 [![C++](https://img.shields.io/badge/Standard-C%2B%2B20%20(Static%20%2FMT)-f34b7d?style=flat-square&logo=cplusplus)](https://github.com/TheGoldeeWay/vlive)
+[![Website](https://img.shields.io/badge/Official%20Page-goldee.obhiyon.com%2Fvlive-black?style=flat-square&logo=safari)](https://goldee.obhiyon.com/vlive.html)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
 **VLive** is a professional, high-performance virtual MIDI controller and live performance ecosystem engineered for sub-millisecond stage responsiveness, multi-performer synchronization, and instant DAW integration on Windows.
+
+🌐 **Official Website & Interactive Product Page**: [https://goldee.obhiyon.com/vlive.html](https://goldee.obhiyon.com/vlive.html)
 
 VLive is **100% standalone and software-based**: it creates an in-process native Windows MIDI device (**"VLive MIDI Controller"**) that any Digital Audio Workstation (REAPER, Ableton Live, FL Studio, Steinberg Nuendo/Cubase, Bitwig) detects immediately without needing external hardware, COM ports, or loopMIDI apps.
 
@@ -162,7 +165,8 @@ Developed by **Anish Goswami (Goldee)**
 - **YouTube**: [@thegoldeeway](https://youtube.com/@thegoldeeway)  
 - **Instagram**: [@goldeemusic](https://www.instagram.com/goldeemusic)  
 - **LinkedIn**: [in/goldee](https://www.linkedin.com/in/goldee)  
-- **Project Repository**: [https://github.com/TheGoldeeWay/vlive](https://github.com/TheGoldeeWay/vlive)
+- **Project Repository**: [https://github.com/TheGoldeeWay/vlive](https://github.com/TheGoldeeWay/vlive)  
+- **Official Product Page**: [https://goldee.obhiyon.com/vlive.html](https://goldee.obhiyon.com/vlive.html)
 
 ---
 
