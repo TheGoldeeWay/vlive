@@ -1,0 +1,52 @@
+name: VLive CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build & Test (Windows x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC C++20 Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Release Binaries
+        run: |
+          cmake --build build --config Release --parallel
+
+      - name: Run MIDI Subsystem Tests
+        run: |
+          .\build\Release\test_midi.exe
+
+      - name: Run Clock & Sync Tests
+        run: |
+          .\build\Release\test_sync.exe
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: VLive-Windows-x64-Binaries
+          path: |
+            VLive.exe
+            build/Release/vlive_core.exe

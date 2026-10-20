@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VLive">
+  <meta name="application-name" content="VLive">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>VLive — Stage MIDI Controller & Studio (Made by Goldee)</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error('VLive Script Error:', e.message, 'at', e.filename, ':', e.lineno);
+    });
+  </script>
+</head>
+<body>
+  <!-- MOBILE PERFORMER COMPACT HUD BAR (Visible on mobile/performer mode) -->
+  <header class="mobile-performer-bar" id="mobilePerformerBar">
+    <div class="mobile-brand">
+      <div class="mobile-logo-mark">
+        <img src="icon-192.png" alt="VLive" class="mobile-app-logo">
+      </div>
+      <div class="mobile-logo-text">
+        <span class="mobile-title">VLIVE</span>
+        <span class="mobile-subtitle">STAGE</span>
+      </div>
+      <span class="mobile-goldee-tag">Made by Goldee</span>
+      <span class="mobile-conn-badge" id="mobileConnBadge">
+        <span class="badge-dot"></span>
+        <span id="mobileConnLabel">LIVE</span>
+      </span>
+    </div>
+
+    <!-- Mobile deck switcher pills (visible if multiple decks exist) -->
+    <div class="mobile-deck-tabs" id="mobileDeckTabs" style="display:none;"></div>
+
+    <div class="mobile-actions">
+      <button id="mobileBtnPwaInstall" class="btn-mobile-action" style="display:none;" title="Install VLive App">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 7v6m-3-3 3 3 3-3"/></svg>
+      </button>
+      <button id="mobileBtnSubnetRadar" class="btn-mobile-action" title="Auto-Radar Wi-Fi Scan">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="m12 12 5-5"/></svg>
+      </button>
+      <button id="mobileBtnFullscreen" class="btn-mobile-action" title="Toggle Fullscreen">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      </button>
+      <button id="mobileBtnMetro" class="btn-mobile-action" title="Metronome">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21h10l-3-18H10L7 21z"/><line x1="12" y1="18" x2="16" y2="7"/><circle cx="16" cy="7" r="1.5" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- HEADER & MASTER STATUS BAR (Desktop Studio - Sleek Reference Layout) -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="logo-mark-sleek" title="VLive">
+        <img src="icon-192.png" alt="VLive Logo" class="brand-app-logo">
+      </div>
+      <div class="logo-text">
+        <span class="title">VLIVE</span>
+        <span class="subtitle">STAGE MIDI CONTROLLER</span>
+      </div>
+    </div>
+
+    <!-- Top bar divider & page navigation pills -->
+    <div class="top-header-divider"></div>
+    <button class="top-menu-btn" id="btnTopMenu" title="DAW Setup & Tools">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="top-header-pages" id="topBarPages">
+      <button class="top-header-page-btn active" data-page="0">MAIN DECK</button>
+      <button class="top-header-page-btn" data-page="1">PAGE 2</button>
+      <button class="top-header-page-add" id="btnTopAddPage">+ NEW PAGE</button>
+    </div>
+
+    <!-- Hidden hardware-hub container kept in DOM for backwards compatibility & listeners -->
+    <div class="hardware-hub" id="topHardwareHub" style="display:none;">
+      <div id="virtualMidiBadge" class="hud-badge virtual-midi-badge connected">
+        <span class="badge-dot"></span>
+        <span id="virtualMidiLabel">MIDI: VLive MIDI Controller</span>
+      </div>
+      <button id="btnHeaderStartDriver" class="btn-start-driver-prominent">START DRIVER</button>
+      <button id="btnDawTest" class="btn-daw-test"><span class="test-icon"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> TEST DAW</button>
+      <button id="btnDawHelp" class="btn-daw-help"><span class="help-icon"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span> DAW SETUP</button>
+      <select id="headerPortSelect" class="select-inline"><option value="">Virtual Port: VLive MIDI Controller</option></select>
+      <span class="daw-hint-val">VLive MIDI Controller</span>
+    </div>
+
+    <!-- HUD BADGES & SETTINGS -->
+    <div class="hud-group">
+      <div id="connBadge" class="hud-badge online">
+        <span class="badge-dot"></span>
+        <span id="connLabel" class="badge-text">ONLINE</span>
+      </div>
+      <button id="btnToggleQrDock" class="btn-qr active" title="Toggle Mobile QR Panel">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>QR</span>
+      </button>
+      <button id="btnSettings" class="btn-settings" title="Settings">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN PERFORMANCE LAYOUT: CUSTOM UI + AUTOMATIC QR DOCK -->
+  <main class="studio-layout">
+    
+    <!-- LEFT: CUSTOM UI CONTROLLER SURFACE -->
+    <section class="custom-studio-surface">
+      
+      <!-- MULTI-PAGE NAVIGATION BAR & DEVICE CONTROLS (Hidden per user request; top header tabs handle pages) -->
+      <nav id="pageNavigationBar" class="page-navigation-bar" aria-label="Performance Page Sets" style="display:none !important;">
+        <div class="page-nav-left">
+          <div class="page-nav-brand-prefix">PAGES</div>
+          <div id="pageTabsContainer" class="page-tabs-container"></div>
+          <button id="btnAddPage" class="btn-page-add" title="Create New UI Page Set">+ New Page</button>
+        </div>
+
+        <div class="page-nav-right">
+          <div class="zoom-scaler-group" title="Scale Canvas UI for touch or high-resolution screens">
+            <span class="zoom-icon">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+            </span>
+            <input type="range" id="canvasZoomSlider" min="70" max="150" value="100" class="zoom-slider">
+            <span id="canvasZoomVal" class="zoom-val">100%</span>
+          </div>
+          <button id="btnSubnetRadar" class="btn-subnet-radar" title="Auto-Scan Wi-Fi Subnet to find Host PC / DAW">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="m12 12 5-5"/></svg>
+            <span>Auto-Radar</span>
+          </button>
+          <button id="btnPwaInstall" class="btn-pwa-install" style="display:none;" title="Install VLive as Native Android App">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 7v6m-3-3 3 3 3-3"/></svg>
+            <span>Install App</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- BUILDER TOOLBAR -->
+      <div class="builder-toolbar">
+        <div class="builder-tool-group">
+          <button id="btnToggleBuilderMode" class="btn-builder-mode play-mode" title="Switch to Edit Mode">
+            <span id="builderModeIcon">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </span>
+            <span id="builderModeText">GO TO EDIT</span>
+          </button>
+        </div>
+
+        <div class="builder-tool-group" id="builderAddControls" style="display:none;">
+          <span class="toolbar-label">ADD CONTROL:</span>
+          <button class="btn-tool-add" data-add="knob">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></span>
+            <span>Knob</span>
+          </button>
+          <button class="btn-tool-add" data-add="fader">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><rect x="8" y="9" width="8" height="5" rx="1.5" fill="currentColor"/></svg></span>
+            <span>Slider Fader</span>
+          </button>
+          <button class="btn-tool-add" data-add="pad">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1" fill="currentColor" opacity="0.3"/></svg></span>
+            <span>Drum Pad</span>
+          </button>
+          <button class="btn-tool-add" data-add="toggle">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="6"/><circle cx="15" cy="12" r="3.5" fill="currentColor"/></svg></span>
+            <span>Toggle Button</span>
+          </button>
+          <button class="btn-tool-add" data-add="button">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5" fill="currentColor"/></svg></span>
+            <span>Trigger Button</span>
+          </button>
+          <button class="btn-tool-add" data-add="xy">
+            <span class="tool-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><line x1="12" y1="4" x2="12" y2="20" stroke-dasharray="2 2"/><line x1="4" y1="12" x2="20" y2="12" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg></span>
+            <span>XY Pad</span>
+          </button>
+        </div>
+
+        <div class="builder-tool-group">
+          <select id="builderPresetSelect" class="select-inline">
+            <option value="" disabled selected>Load Preset Layout...</option>
+            <option value="reference">Reference Deck (6 Controls)</option>
+            <option value="synth">Synth Control Deck (Cutoff, Res, ADSR)</option>
+            <option value="dj">4-Deck DJ Mixer (EQs, Filter, Delay XY)</option>
+            <option value="mix4">4-Track Performance Mix (Faders & Mutes)</option>
+            <option value="pads8">8-Pad Finger Drum Rack</option>
+          </select>
+        </div>
+
+        <div class="builder-tool-group edit-actions" id="builderEditActions" style="display:none;">
+          <button id="btnQuickDup" class="btn-tool-action" title="Duplicate Selected Control (Ctrl+D)">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4a2 2 0 0 1 2-2h12"/></svg>
+            <span>Dup</span>
+          </button>
+          <button id="btnQuickCopy" class="btn-tool-action" title="Copy Selected Control (Ctrl+C)">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Copy</span>
+          </button>
+          <button id="btnQuickPaste" class="btn-tool-action" title="Paste Copied Control (Ctrl+V)">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M12 11v6m-3-3 3 3 3-3"/></svg>
+            <span>Paste</span>
+          </button>
+          <button id="btnQuickDel" class="btn-tool-action danger" title="Delete Selected Control (Delete)">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
+          <span class="tool-sep" style="color:#333333; margin: 0 2px;">|</span>
+          <button id="btnQuickUndo" class="btn-tool-action" title="Undo Layout Edit (Ctrl+Z)">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+            <span>Undo</span>
+          </button>
+          <button id="btnQuickRedo" class="btn-tool-action" title="Redo Layout Edit (Ctrl+Y)">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+            <span>Redo</span>
+          </button>
+        </div>
+
+        <div class="builder-tool-group actions">
+          <button id="btnSaveLayout" class="btn-tool-action" title="Save Current Layout">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>Save</span>
+          </button>
+          <button id="btnLoadSavedLayout" class="btn-tool-action" title="Load Saved Layout">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span>Load</span>
+          </button>
+          <button id="btnExportLayout" class="btn-tool-action" title="Export .gvl Project File">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Export .gvl</span>
+          </button>
+          <button id="btnImportLayout" class="btn-tool-action" title="Import .gvl Project File">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Import .gvl</span>
+          </button>
+          <input type="file" id="fileImportLayout" accept=".gvl,.json" style="display:none;">
+          <button id="btnClearLayout" class="btn-tool-action danger">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span>Clear</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- DESIGN MODE SHORTCUTS HUD BAR (Visible in Edit Mode) -->
+      <div id="shortcutsHudBar" class="shortcuts-hud-bar">
+        <span class="shortcuts-hud-title">⌨ SHORTCUTS:</span>
+        <span class="shortcut-pill"><kbd>Ctrl+C</kbd> Copy</span>
+        <span class="shortcut-pill"><kbd>Ctrl+V</kbd> Paste</span>
+        <span class="shortcut-pill"><kbd>Ctrl+D</kbd> Duplicate</span>
+        <span class="shortcut-pill"><kbd>Del</kbd> Delete</span>
+        <span class="shortcut-pill"><kbd>Arrows</kbd> Move (1px)</span>
+        <span class="shortcut-pill"><kbd>Shift+Arrows</kbd> Move (10px)</span>
+        <span class="shortcut-pill"><kbd>Ctrl+Z</kbd> Undo</span>
+        <span class="shortcut-pill"><kbd>Ctrl+Y</kbd> Redo</span>
+        <span class="shortcut-pill"><kbd>Esc</kbd> Deselect</span>
+      </div>
+
+      <!-- EDITING TOAST NOTIFICATION -->
+      <div id="editingToast" class="editing-toast"></div>
+
+      <!-- CANVAS CONTEXT MENU (Right-click in Design Mode) -->
+      <div id="canvasContextMenu" class="canvas-context-menu" style="display:none;">
+        <div class="context-menu-header">ADD CONTROL</div>
+        <div class="context-menu-item" data-action="add" data-type="knob">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></span> Rotary Knob
+        </div>
+        <div class="context-menu-item" data-action="add" data-type="fader">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><rect x="8" y="9" width="8" height="5" rx="1.5" fill="currentColor"/></svg></span> Slider Fader
+        </div>
+        <div class="context-menu-item" data-action="add" data-type="pad">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><rect x="8" y="8" width="8" height="8" rx="1" fill="currentColor" opacity="0.3"/></svg></span> Drum Pad
+        </div>
+        <div class="context-menu-item" data-action="add" data-type="toggle">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="6"/><circle cx="15" cy="12" r="3.5" fill="currentColor"/></svg></span> Toggle Switch
+        </div>
+        <div class="context-menu-item" data-action="add" data-type="button">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5" fill="currentColor"/></svg></span> Trigger Button
+        </div>
+        <div class="context-menu-item" data-action="add" data-type="xy">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><line x1="12" y1="4" x2="12" y2="20" stroke-dasharray="2 2"/><line x1="4" y1="12" x2="20" y2="12" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg></span> XY Pad
+        </div>
+        <div class="context-menu-sep" id="contextMenuPasteSep" style="display:none;"></div>
+        <div class="context-menu-item" id="contextMenuPaste" data-action="paste" style="display:none;">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M12 11v6m-3-3 3 3 3-3"/></svg></span> Paste Here
+        </div>
+      </div>
+
+      <!-- PAGE TAB CONTEXT MENU (Right click on page) -->
+      <div id="pageContextMenu" class="canvas-context-menu page-context-menu" style="display:none; z-index: 1500;">
+        <div class="context-menu-header" id="pageContextMenuTitle">PAGE OPTIONS</div>
+        <div class="context-menu-item" data-page-action="rename">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Rename Page
+        </div>
+        <div class="context-menu-item" data-page-action="duplicate">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span> Duplicate Page
+        </div>
+        <div class="context-menu-item" data-page-action="options">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Page Settings
+        </div>
+        <div class="context-menu-sep"></div>
+        <div class="context-menu-item danger" data-page-action="delete">
+          <span class="context-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></span> Delete Page
+        </div>
+      </div>
+
+      <!-- MARQUEE MULTI-SELECTION BOX -->
+      <div id="canvasMarqueeBox" class="canvas-marquee-box" style="display:none;"></div>
+
+      <!-- UNIFIED PERFORMANCE & EDITING CANVAS -->
+      <div class="builder-canvas-viewport" id="builderCanvasViewport">
+        <div class="canvas-device-frame" id="canvasDeviceFrame">
+          <div id="builderCanvas" class="builder-canvas">
+            <!-- Custom widgets will dynamically render here -->
+          </div>
+        </div>
+        <div id="builderEmptyState" class="builder-empty-state" style="display:none;">
+          <div class="empty-icon"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); opacity:0.6;"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="6" x2="7" y2="18"/><line x1="12" y1="6" x2="12" y2="18"/><line x1="17" y1="6" x2="17" y2="18"/><circle cx="7" cy="10" r="2" fill="currentColor"/><circle cx="12" cy="15" r="2" fill="currentColor"/><circle cx="17" cy="8" r="2" fill="currentColor"/></svg></div>
+          <h3>YOUR CUSTOM CONTROLLER SURFACE IS EMPTY</h3>
+          <p>Click <strong>"+ Rotary Knob"</strong>, <strong>"+ Slider Fader"</strong>, <strong>"+ Drum Pad"</strong> above or select a <strong>Preset</strong> to start building your live performance layout.</p>
+        </div>
+      </div>
+
+      <!-- BOTTOM STUDIO STATUS & BRANDING STRIP -->
+      <footer class="studio-status-strip">
+        <div class="strip-left">
+          <span id="statusActivePageLbl">Page 1: Synth</span>
+          <span class="strip-sep">•</span>
+          <span id="statusWidgetCountLbl">0 Controls</span>
+          <span class="strip-sep">•</span>
+          <span id="statusVirtualMidiLbl">Virtual MIDI: VLive MIDI Controller</span>
+        </div>
+        <div class="strip-right">
+          <span class="brand-strip-goldee"><img src="icon-192.png" alt="" style="width:13px; height:13px; vertical-align:middle; margin-right:5px; border-radius:3px;">VLIVE v2.0 &nbsp;•&nbsp; Made by Goldee</span>
+        </div>
+      </footer>
+
+    </section>
+
+    <!-- RIGHT: AUTOMATIC QR & MOBILE CONNECTION DOCK -->
+    <!-- RIGHT: DOCK PANEL (INSPECTOR IN EDIT MODE / QR IN PLAY MODE) -->
+    <aside id="qrDockPanel" class="qr-dock-panel">
+      <div class="qr-dock-header">
+        <div class="dock-tab-bar">
+          <button id="btnTabInspector" class="btn-dock-tab" title="Control Inspector" style="display:none; align-items:center; gap:6px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Inspector</span></button>
+          <button id="btnTabQr" class="btn-dock-tab active" title="Mobile QR Link" style="align-items:center; gap:6px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>QR Code</span></button>
+        </div>
+        <button id="btnCloseQrDock" class="btn-icon" title="Collapse Panel">&times;</button>
+      </div>
+
+      <!-- VIEW 1: CONTROL INSPECTOR (Active in Edit/Design Mode) -->
+      <div id="dockInspectorView" class="dock-view-body">
+        <div id="inspectorEmptyState" class="inspector-empty-state">
+          <div class="inspector-empty-icon"><svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted); opacity:0.6;"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="6" x2="7" y2="18"/><line x1="12" y1="6" x2="12" y2="18"/><line x1="17" y1="6" x2="17" y2="18"/><circle cx="7" cy="10" r="2" fill="currentColor"/><circle cx="12" cy="15" r="2" fill="currentColor"/><circle cx="17" cy="8" r="2" fill="currentColor"/></svg></div>
+          <h4>NO CONTROL SELECTED</h4>
+          <p>Click any knob, fader, pad, or button on the canvas to inspect and configure its MIDI settings.</p>
+        </div>
+
+        <div id="inspectorContent" class="inspector-content" style="display:none;">
+          <!-- Widget Identity & Actions -->
+          <div class="insp-header-banner">
+            <div class="insp-badge-title-group">
+              <span id="inspWidgetTypeBadge" class="insp-type-badge">KNOB</span>
+              <h3 id="inspWidgetTitle" class="insp-title-text">Filter Cutoff</h3>
+            </div>
+            <div class="insp-header-actions">
+              <button id="btnInspDuplicate" class="btn-insp-action" title="Duplicate Control"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+              <button id="btnInspDelete" class="btn-insp-action danger" title="Delete Control"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Control Label -->
+          <div class="insp-group">
+            <label class="insp-label">CONTROL NAME / LABEL</label>
+            <input type="text" id="inspWidgetLabel" class="input-text insp-input" placeholder="e.g. Filter Cutoff">
+          </div>
+
+          <!-- Freeform Position & Dimensions -->
+          <div class="insp-group">
+            <div class="insp-group-header">
+              <label class="insp-label">POSITION & SIZE (FREEFORM)</label>
+              <span id="inspDimensionsBadge" class="insp-midi-badge">180 × 220 px</span>
+            </div>
+            <div class="insp-row-2">
+              <div>
+                <span class="insp-sublabel">X Position (px)</span>
+                <input type="number" id="inspPosX" class="input-text insp-input" min="0" max="4000" step="10" placeholder="0">
+              </div>
+              <div>
+                <span class="insp-sublabel">Y Position (px)</span>
+                <input type="number" id="inspPosY" class="input-text insp-input" min="0" max="4000" step="10" placeholder="0">
+              </div>
+            </div>
+            <div class="insp-row-2" style="margin-top: 6px;">
+              <div>
+                <span class="insp-sublabel">Width (px)</span>
+                <input type="number" id="inspWidth" class="input-text insp-input" min="60" max="2000" step="10" placeholder="180">
+              </div>
+              <div>
+                <span class="insp-sublabel">Height (px)</span>
+                <input type="number" id="inspHeight" class="input-text insp-input" min="50" max="2000" step="10" placeholder="220">
+              </div>
+            </div>
+            <div class="insp-quick-sizes" style="margin-top: 8px;">
+              <span class="insp-sublabel" style="display:block; margin-bottom: 5px;">Quick Presets:</span>
+              <div class="quick-size-buttons" id="quickSizeButtons">
+                <button type="button" class="btn-quick-size" data-w="140" data-h="160">Compact</button>
+                <button type="button" class="btn-quick-size" data-w="180" data-h="220">Standard</button>
+                <button type="button" class="btn-quick-size" data-w="150" data-h="320">Tall Fader</button>
+                <button type="button" class="btn-quick-size" data-w="280" data-h="150">Wide Pad</button>
+                <button type="button" class="btn-quick-size" data-w="220" data-h="220">Square Pad</button>
+                <button type="button" class="btn-quick-size" data-w="340" data-h="260">Big XY</button>
+                <button type="button" class="btn-quick-size" data-w="480" data-h="110">Wide Bar</button>
+              </div>
+            </div>
+            <!-- Hidden selects for backward compatibility -->
+            <select id="inspColSpan" style="display:none;"></select>
+            <select id="inspRowSpan" style="display:none;"></select>
+          </div>
+
+          <!-- Accent Color Swatches -->
+          <div class="insp-group">
+            <label class="insp-label">ACCENT COLOR</label>
+            <div class="insp-color-swatches" id="inspColorSwatches">
+              <button class="color-swatch-btn color-cyan active" data-color="cyan" title="Neon Cyan"></button>
+              <button class="color-swatch-btn color-magenta" data-color="magenta" title="Neon Magenta"></button>
+              <button class="color-swatch-btn color-amber" data-color="amber" title="Electric Amber"></button>
+              <button class="color-swatch-btn color-lime" data-color="lime" title="Neon Lime"></button>
+              <button class="color-swatch-btn color-violet" data-color="violet" title="Ultra Violet"></button>
+              <button class="color-swatch-btn color-red" data-color="red" title="Crimson Red"></button>
+            </div>
+          </div>
+
+          <!-- MIDI Assignment -->
+          <div class="insp-group">
+            <div class="insp-group-header">
+              <label class="insp-label">MIDI ASSIGNMENT</label>
+              <span id="inspMidiHelperBadge" class="insp-midi-badge">CC #74</span>
+            </div>
+
+            <div class="insp-row-2">
+              <div>
+                <span class="insp-sublabel">Message Type</span>
+                <select id="inspMsgType" class="select-inline insp-select">
+                  <option value="cc">Control Change (CC)</option>
+                  <option value="note">Note On / Off</option>
+                  <option value="pitch">Pitch Bend</option>
+                </select>
+              </div>
+              <div>
+                <span class="insp-sublabel">MIDI Channel</span>
+                <select id="inspChannel" class="select-inline insp-select">
+                  <option value="0">Ch 1 (Lead)</option>
+                  <option value="1">Ch 2</option>
+                  <option value="2">Ch 3</option>
+                  <option value="3">Ch 4</option>
+                  <option value="4">Ch 5</option>
+                  <option value="5">Ch 6</option>
+                  <option value="6">Ch 7</option>
+                  <option value="7">Ch 8</option>
+                  <option value="8">Ch 9</option>
+                  <option value="9">Ch 10 (Drums)</option>
+                  <option value="10">Ch 11</option>
+                  <option value="11">Ch 12</option>
+                  <option value="12">Ch 13</option>
+                  <option value="13">Ch 14</option>
+                  <option value="14">Ch 15</option>
+                  <option value="15">Ch 16 (Global)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:8px;">
+              <span class="insp-sublabel" id="inspMidiNumLabel">Custom MIDI Number (0..127)</span>
+              <div class="insp-num-wrap">
+                <input type="number" id="inspMidiNum" class="input-text insp-input" min="0" max="127" value="74">
+                <span id="inspNoteNameDisplay" class="insp-note-pill">Note / CC</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Value Range & Behavior -->
+          <div class="insp-group">
+            <label class="insp-label">VALUE RANGE & BEHAVIOR</label>
+            <div class="insp-row-2" style="margin-top:4px;">
+              <div>
+                <span class="insp-sublabel">Min Value</span>
+                <input type="number" id="inspMinVal" class="input-text insp-input" min="0" max="127" value="0">
+              </div>
+              <div>
+                <span class="insp-sublabel">Max Value</span>
+                <input type="number" id="inspMaxVal" class="input-text insp-input" min="0" max="127" value="127">
+              </div>
+            </div>
+
+            <div style="margin-top:8px;" id="inspBehaviorRow">
+              <span class="insp-sublabel">Behavior Mode</span>
+              <select id="inspBehavior" class="select-inline insp-select">
+                <option value="standard">Standard (0..127)</option>
+                <option value="bipolar">Bipolar Center (-64..+63)</option>
+                <option value="momentary">Momentary (Trigger on press)</option>
+                <option value="toggle">Toggle (Latching on/off)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Quick Live Value Test Slider -->
+          <div class="insp-group">
+            <div class="insp-group-header">
+              <label class="insp-label">LIVE VALUE TEST</label>
+              <span id="inspLiveValDisplay" class="insp-live-val">64</span>
+            </div>
+            <input type="range" id="inspLiveSlider" min="0" max="127" value="64" class="insp-slider" style="width:100%; margin-top:6px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: AUTOMATIC QR & MOBILE LINK VIEW (Active in Play Mode or on QR Tab) -->
+      <div id="dockQrView" class="dock-view-body" style="display:none;">
+        <div class="qr-dock-body">
+          <div class="qr-dock-image-wrap" id="qrDockWrap">
+            <!-- Vector SVG QR code automatically loaded on startup -->
+            <img id="autoQrImage" src="/api/qr" alt="VLive QR Code" />
+          </div>
+
+          <div class="qr-dock-info">
+            <button class="btn-scan-perform" id="btnScanPerform" title="Scan QR with mobile device">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+              </svg>
+              <span>SCAN TO PERFORM</span>
+            </button>
+            <p class="qr-dock-desc">Point your phone, iPad, or tablet camera to open this custom layout on mobile in real-time sync.</p>
+          </div>
+
+          <div class="qr-dock-urls">
+            <label>NETWORK / ADAPTER IP:</label>
+            <div class="ip-row" style="position:relative; margin-bottom:8px;">
+              <select id="qrIpSelect" class="select-inline" style="width:100%; font-weight:700; font-family:var(--font-mono); font-size:11px; padding-right:26px;">
+                <option value="">Detecting Network...</option>
+              </select>
+              <button id="btnCopyIp" class="btn-input-copy" title="Copy IP" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#888888; cursor:pointer; display:flex; align-items:center;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <label>STAGE WI-FI ADDRESS:</label>
+            <div class="url-row" style="position:relative; margin-bottom:8px;">
+              <div id="qrPrimaryUrlDisplay" class="url-display">http://127.0.0.1:8088</div>
+              <button id="btnCopyUrlInline" class="btn-input-copy" title="Copy URL" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#888888; cursor:pointer; display:flex; align-items:center;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <button id="btnCopyDockUrl" class="btn-secondary" style="width:100%; padding:7px 10px; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copy Link</span>
+            </button>
+          </div>
+
+          <div class="qr-dock-performers">
+            <span class="performer-badge">
+              <span class="badge-dot" style="background:#10b981;"></span>
+              <span id="qrPerformersCount">0 Mobile Devices Synced</span>
+            </span>
+          </div>
+
+          <!-- VIRTUAL MIDI DRIVER SECTION IN QR PANEL -->
+          <div class="qr-dock-midi-card" style="width:100%; box-sizing:border-box; margin-top:14px; padding:0; background:transparent; border:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:10px; font-weight:800; color:#888888; font-family:var(--font-mono); letter-spacing:0.5px;">MIDI CONTROLLER</span>
+              <span id="qrMidiStatusBadge" style="font-size:9px; font-weight:800; padding:2px 8px; border-radius:10px; font-family:var(--font-mono); background:rgba(255,255,255,0.08); color:#ffffff; border:1px solid rgba(255,255,255,0.2);">ACTIVE</span>
+            </div>
+            <div id="qrMidiPortDesc" style="font-size:11px; color:#a0a0a0; margin-bottom:10px; font-family:var(--font-mono);">
+              Device: <strong>VLive MIDI Controller</strong>
+            </div>
+            <button id="btnQrStartDriver" class="btn-secondary" style="width:100%; box-sizing:border-box; padding:9px 12px; font-size:11px; font-weight:700; font-family:var(--font-mono); display:flex; align-items:center; justify-content:center; gap:6px; background:#181818; border:1px solid #2c2c2c; border-radius:6px; cursor:pointer; color:#ffffff;">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span>START DRIVER</span>
+            </button>
+            <button id="btnQrTestNote" class="btn-secondary" style="width:100%; box-sizing:border-box; margin-top:6px; padding:8px 12px; font-size:11px; font-family:var(--font-mono); display:flex; align-items:center; justify-content:center; gap:6px; background:#181818; border:1px solid #2c2c2c; border-radius:6px; cursor:pointer; color:#cccccc;">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Test MIDI to DAW</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- WIDGET CONFIGURATION INSPECTOR MODAL -->
+  <div class="modal-overlay" id="widgetConfigModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="widgetConfigTitle">CUSTOMIZE MIDI WIDGET</h3>
+        <button class="modal-close" id="btnCloseWidgetConfig">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="setting-section">
+          <h4>LABEL & IDENTITY</h4>
+          <div class="input-row">
+            <label style="flex:1;">Control Name / Label:
+              <input type="text" id="cfgWidgetLabel" class="input-text" value="Filter Cutoff">
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-section">
+          <h4>MIDI MESSAGE ASSIGNMENT</h4>
+          <div class="config-grid">
+            <label>Message Type:
+              <select id="cfgMsgType" class="select-inline" style="width:100%;">
+                <option value="cc" selected>Control Change (CC)</option>
+                <option value="note">Note On / Off</option>
+                <option value="pitch">Pitch Bend</option>
+              </select>
+            </label>
+            <label>MIDI Channel:
+              <select id="cfgChannel" class="select-inline" style="width:100%;">
+                <option value="0">Channel 1</option>
+                <option value="1">Channel 2</option>
+                <option value="2">Channel 3</option>
+                <option value="3">Channel 4</option>
+                <option value="4">Channel 5</option>
+                <option value="5">Channel 6</option>
+                <option value="6">Channel 7</option>
+                <option value="7">Channel 8</option>
+                <option value="8">Channel 9</option>
+                <option value="9">Channel 10 (Drums)</option>
+                <option value="10">Channel 11</option>
+                <option value="11">Channel 12</option>
+                <option value="12">Channel 13</option>
+                <option value="13">Channel 14</option>
+                <option value="14">Channel 15</option>
+                <option value="15">Channel 16 (Mixer/Global)</option>
+              </select>
+            </label>
+            <label>Custom MIDI Number (CC# or Note# 0-127):
+              <input type="number" id="cfgMidiNum" class="input-text" value="74" min="0" max="127">
+              <span id="cfgNoteNameHelper" class="cc-hint">CC #74</span>
+            </label>
+            <label>Accent Color:
+              <select id="cfgColor" class="select-inline" style="width:100%;">
+                <option value="cyan" selected>Neon Cyan</option>
+                <option value="magenta">Neon Magenta</option>
+                <option value="amber">Electric Amber</option>
+                <option value="lime">Neon Lime</option>
+                <option value="violet">Ultra Violet</option>
+                <option value="red">Crimson Red</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-section">
+          <h4>VALUE RANGE & BEHAVIOR</h4>
+          <div class="config-grid">
+            <label>Min Value (0-127):
+              <input type="number" id="cfgMinVal" class="input-text" value="0" min="0" max="127">
+            </label>
+            <label>Max Value (0-127):
+              <input type="number" id="cfgMaxVal" class="input-text" value="127" min="0" max="127">
+            </label>
+            <label id="cfgBehaviorWrap">Behavior Mode:
+              <select id="cfgBehavior" class="select-inline" style="width:100%;">
+                <option value="standard" selected>Standard (0..127)</option>
+                <option value="bipolar">Bipolar Center (-64..+63)</option>
+                <option value="momentary">Momentary (Trigger on press)</option>
+                <option value="toggle">Toggle (Latching on/off)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+          <button id="btnDeleteWidgetModal" class="btn-secondary danger" style="font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            <span>Delete Widget</span>
+          </button>
+          <div style="display:flex; gap:8px;">
+            <button id="btnCancelWidgetConfig" class="btn-secondary">Cancel</button>
+            <button id="btnSaveWidgetConfig" class="btn-primary">Apply Settings</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="icon-192.png" alt="VLive" style="width:20px; height:20px; border-radius:4px; object-fit:contain;">
+          <h3>VLIVE STUDIO SETTINGS</h3>
+        </div>
+        <button class="modal-close" id="btnCloseSettings">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- VIRTUAL MIDI & SYSTEM ROUTING -->
+        <div class="setting-section">
+          <h4>VIRTUAL MIDI ENGINE & SYSTEM ROUTING</h4>
+          <p class="section-desc">In-process native Windows virtual MIDI port creates a direct hardware-free pipe into any DAW.</p>
+          <div class="cable-action-row" style="margin-bottom:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <span id="virtualMidiModalStatus" class="serial-status" style="font-size:13px; font-weight:700; color:#ffffff;">Device: VLive MIDI Controller (Active)</span>
+            <button id="btnStartDriver" class="btn-primary" style="font-size:11px; padding:6px 12px; font-weight:700; background:#242424; border:1px solid #404040; color:#fff; border-radius:6px; cursor:pointer; font-family:var(--font-mono); display:inline-flex; align-items:center; gap:5px;">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Start Driver (Admin)</span>
+            </button>
+            <button id="btnModalDawTest" class="btn-secondary" style="font-size:11px; padding:6px 12px; font-family:var(--font-mono); border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="4" x2="6" y2="13"/><line x1="10" y1="4" x2="10" y2="13"/><line x1="14" y1="4" x2="14" y2="13"/><line x1="18" y1="4" x2="18" y2="13"/></svg>
+              <span>Test Middle C</span>
+            </button>
+          </div>
+          <div class="baud-row" style="display:flex; align-items:center; gap:8px;">
+            <label style="flex:1;">Alternative WinMM MIDI Output:
+              <select id="winmmPortSelect" class="select-inline" style="width:100%;">
+                <option value="">Virtual Port Only (Recommended)</option>
+              </select>
+            </label>
+            <button id="btnSwitchWinmmPort" class="btn-pill" style="align-self:flex-end; height:32px;">Route Output</button>
+          </div>
+          <div class="daw-help-card" style="margin-top:12px; padding:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span style="font-size:12px; font-weight:700; color:#ffffff; display:inline-flex; align-items:center; gap:6px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="4" x2="6" y2="13"/><line x1="10" y1="4" x2="10" y2="13"/><line x1="14" y1="4" x2="14" y2="13"/><line x1="18" y1="4" x2="18" y2="13"/></svg>
+                <span>CONNECT TO YOUR DAW:</span>
+              </span>
+              <p style="font-size:11px; color:var(--text-muted); margin:4px 0 0 0;">
+                Select <strong>VLive MIDI Controller</strong> in your DAW MIDI Input Preferences.
+              </p>
+            </div>
+            <button id="btnModalOpenDawHelp" class="btn-pill" style="white-space:nowrap;">View DAW Guide</button>
+          </div>
+        </div>
+
+        <!-- NETWORK LATENCY DIAGNOSTICS -->
+        <div class="setting-section">
+          <h4>NETWORK & CLOCK SYNCHRONIZATION</h4>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Round Trip Time (RTT)</span>
+              <span class="metric-val" id="metricRtt">-- ms</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Clock Offset (&Delta;)</span>
+              <span class="metric-val" id="metricOffset">-- ms</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Packet Transport</span>
+              <span class="metric-val" id="metricTransport">WebSocket Binary</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Assigned Role</span>
+              <span class="metric-val" id="metricRole">Custom Controller</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIVE DAW SETUP ASSISTANT MODAL -->
+  <div class="modal-overlay" id="modalDawSetup">
+    <div class="modal-card daw-modal-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="icon-192.png" alt="VLive" style="width:24px; height:24px; border-radius:4px; object-fit:contain;">
+          <div>
+            <h3>DAW SETUP ASSISTANT</h3>
+            <p class="modal-subtitle" style="font-size:11px; color:var(--text-muted); margin:3px 0 0 0;">Follow these steps to activate MIDI reception in your DAW</p>
+          </div>
+        </div>
+        <button class="modal-close" id="btnCloseDawSetup">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- TOP STATUS STRIP & TEST BUTTON -->
+        <div class="daw-status-banner">
+          <div class="daw-port-tag">
+            <span class="pulse-dot"></span>
+            <span>Virtual Port: <strong id="dawModalPortName">VLive MIDI Controller</strong></span>
+          </div>
+          <button id="btnDawModalTest" class="btn-primary" style="padding:5px 12px; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Send Test Note</span>
+          </button>
+        </div>
+
+        <!-- DAW SELECTOR TABS -->
+        <div class="daw-tabs">
+          <button class="daw-tab active" data-daw="reaper">REAPER</button>
+          <button class="daw-tab" data-daw="nuendo">Nuendo / Cubase</button>
+          <button class="daw-tab" data-daw="ableton">Ableton Live</button>
+          <button class="daw-tab" data-daw="flstudio">FL Studio</button>
+        </div>
+
+        <!-- TAB CONTENT: REAPER -->
+        <div class="daw-tab-content active" id="tab-reaper">
+          <div class="step-list">
+            <div class="step-item">
+              <span class="step-num">1</span>
+              <div class="step-text">In REAPER, click <strong>Options &gt; Preferences</strong> (or press <kbd>Ctrl + P</kbd>).</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">2</span>
+              <div class="step-text">In the left sidebar, navigate to <strong>Audio &gt; MIDI Devices</strong>.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">3</span>
+              <div class="step-text">In the upper list (<em>MIDI inputs to make available to tracks...</em>), find <code class="highlight-code">VLive MIDI Controller</code>. (Notice it starts in <code>&lt;disabled&gt;</code> state).</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">4</span>
+              <div class="step-text"><strong>Right-click</strong> on <code class="highlight-code">VLive MIDI Controller</code> and select <strong>Enable input</strong>, and also check <strong>Enable input for control messages</strong>. Then click <strong>Apply</strong>.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">5</span>
+              <div class="step-text">Insert a Track (<kbd>Ctrl + T</kbd>), set Track Input to <strong>Input: MIDI &gt; VLive MIDI Controller &gt; All Channels</strong>, click the <strong>Record Arm (Red)</strong> button, and click <strong>Record Monitoring: ON</strong>. Click <strong>Send Test Note</strong> above — you'll immediately see the track meter light up green!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: NUENDO / CUBASE -->
+        <div class="daw-tab-content" id="tab-nuendo">
+          <div class="step-list">
+            <div class="step-item">
+              <span class="step-num">1</span>
+              <div class="step-text">In Nuendo / Cubase, open <strong>Studio &gt; Studio Setup...</strong> from the top menu bar.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">2</span>
+              <div class="step-text">In the left category panel, click <strong>MIDI Port Setup</strong>.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">3</span>
+              <div class="step-text">Locate <code class="highlight-code">VLive MIDI Controller</code> under the Input Ports list. Ensure the <strong>State</strong> column shows <strong>Active</strong>.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">4</span>
+              <div class="step-text">Check the box in the <strong>"In 'All MIDI Inputs'"</strong> column so all instrument tracks pick it up automatically. Click <strong>OK</strong>.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">5</span>
+              <div class="step-text">Add an Instrument track (e.g. HALion Sonic / Retrologue). Select Input as <strong>All MIDI Inputs</strong> or <strong>VLive MIDI Controller</strong>. Hit <strong>Send Test Note</strong> to hear your synth trigger!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: ABLETON LIVE -->
+        <div class="daw-tab-content" id="tab-ableton">
+          <div class="step-list">
+            <div class="step-item">
+              <span class="step-num">1</span>
+              <div class="step-text">In Ableton Live, open <strong>Options &gt; Preferences</strong> (or <kbd>Ctrl + ,</kbd>).</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">2</span>
+              <div class="step-text">Select the <strong>Link / Tempo / MIDI</strong> tab on the left.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">3</span>
+              <div class="step-text">Scroll to <strong>MIDI Ports</strong> and find <code class="highlight-code">Input: VLive MIDI Controller</code>.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">4</span>
+              <div class="step-text">Toggle <strong>Track: ON</strong> (to play software instruments) and <strong>Remote: ON</strong> (to MIDI map knobs, sliders, pads).</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT: FL STUDIO -->
+        <div class="daw-tab-content" id="tab-flstudio">
+          <div class="step-list">
+            <div class="step-item">
+              <span class="step-num">1</span>
+              <div class="step-text">Press <kbd>F10</kbd> in FL Studio to open <strong>Settings</strong> and switch to the <strong>MIDI</strong> tab.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">2</span>
+              <div class="step-text">Under <strong>Input</strong>, click on <code class="highlight-code">VLive MIDI Controller</code>.</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">3</span>
+              <div class="step-text">Click the <strong>Enable</strong> button below the list so the light turns on (orange or green).</div>
+            </div>
+            <div class="step-item">
+              <span class="step-num">4</span>
+              <div class="step-text">Close settings. Play any selected instrument channel from your VLive stage keys or sequencer!</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; border-top:1px solid rgba(255,255,255,0.08);">
+        <span style="font-size:11px; color:var(--text-muted); display:inline-flex; align-items:center; gap:5px;">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>If your DAW was already open when VLive launched, click "Reset Devices" in your DAW preferences.</span>
+        </span>
+        <button class="btn-primary" id="btnGotItDaw">Close Guide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBNET AUTO-DISCOVERY RADAR MODAL -->
+  <div class="modal-overlay" id="modalSubnetRadar">
+    <div class="modal-card radar-modal-card">
+      <div class="modal-header">
+        <div class="radar-header-group">
+          <span class="radar-pulse-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+          </span>
+          <div>
+            <h3>HOST AUTO-DISCOVERY RADAR</h3>
+            <p class="modal-subtitle">Auto-scans your local Wi-Fi to find and lock onto your PC DAW</p>
+          </div>
+        </div>
+        <button class="modal-close" id="btnCloseRadar">&times;</button>
+      </div>
+      <div class="modal-body radar-modal-body">
+        <div class="radar-screen-wrap">
+          <div class="radar-screen" id="radarScreenVisual">
+            <div class="radar-sweep-beam"></div>
+            <div class="radar-ring ring-1"></div>
+            <div class="radar-ring ring-2"></div>
+            <div class="radar-ring ring-3"></div>
+            <div class="radar-grid-line horiz"></div>
+            <div class="radar-grid-line vert"></div>
+            <div id="radarTargetBlip" class="radar-target-blip" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="radar-feedback-wrap">
+          <div class="radar-status-line" id="radarStatusLine">Ready to search Wi-Fi network for VLive host...</div>
+          <div class="radar-meter-track">
+            <div class="radar-meter-bar" id="radarMeterBar" style="width: 0%;"></div>
+          </div>
+          <div class="radar-host-detected" id="radarHostDetected"></div>
+        </div>
+      </div>
+      <div class="modal-footer radar-footer">
+        <span class="radar-goldee-credit">VLive Radar • <strong>Made by Goldee</strong></span>
+        <div class="radar-btn-group">
+          <button class="btn-tool-action" id="btnCancelRadar">Close</button>
+          <button class="btn-primary" id="btnStartRadarScan" style="display:inline-flex; align-items:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Auto-Scan & Sync</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE SETTINGS & RENAME MODAL -->
+  <div class="modal-overlay" id="modalPageOptions">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="icon-192.png" alt="VLive" style="width:18px; height:18px; border-radius:3px; object-fit:contain;">
+          <h3 id="pageOptionsModalTitle">PAGE OPTIONS</h3>
+        </div>
+        <button class="modal-close" id="btnClosePageOptions">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-section">
+          <label class="setting-label" for="pageRenameInput">Page Name</label>
+          <input type="text" id="pageRenameInput" class="input-text" placeholder="e.g. Lead Synth Deck">
+        </div>
+        <div class="page-action-row" style="display: flex; gap: 8px; margin-top: 10px;">
+          <button id="btnDuplicatePage" class="btn-tool-action" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Duplicate Page</span>
+          </button>
+          <button id="btnDeletePage" class="btn-tool-action danger" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            <span>Delete Page</span>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-tool-action" id="btnCancelPageOptions">Cancel</button>
+        <button class="btn-primary" id="btnSavePageOptions">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLEEK CUSTOM DIALOG MODAL (Prompt / Confirm / Alert) -->
+  <div class="modal-overlay" id="modalVLiveDialog" style="display:none; z-index: 2000;">
+    <div class="modal-card vlive-dialog-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="icon-192.png" alt="VLive" style="width:20px; height:20px; border-radius:4px; object-fit:contain;">
+          <h3 id="vliveDialogTitle" style="margin:0; font-size:13px; font-weight:700; letter-spacing:0.8px; color:#ffffff;">PROMPT</h3>
+        </div>
+        <button class="modal-close" id="btnVLiveDialogClose">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 18px 20px; gap: 12px;">
+        <p id="vliveDialogMessage" style="font-size:13px; color:#cfcfcf; line-height:1.45; margin:0;"></p>
+        <div id="vliveDialogInputWrapper" style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+          <input type="text" id="vliveDialogInput" class="vlive-dialog-input" spellcheck="false" autocomplete="off" />
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border-dim);">
+        <button class="btn-tool-action" id="btnVLiveDialogCancel" style="padding: 8px 16px; font-size: 12px;">Cancel</button>
+        <button class="btn-primary" id="btnVLiveDialogConfirm" style="padding: 8px 20px; font-size: 12px; font-weight: 700;">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA APP INSTALLATION MODAL -->
+  <div class="modal-overlay" id="pwaInstallModal" style="display:none;">
+    <div class="modal-card pwa-install-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="icon-192.png" alt="VLive" style="width:20px; height:20px; border-radius:4px; object-fit:contain;">
+          <h3 style="margin:0; font-size:14px; letter-spacing:0.5px;">INSTALL VLIVE APP</h3>
+        </div>
+        <button class="modal-close" id="btnClosePwaModal">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px;">
+        <p style="font-size:12px; color:#a0a0a0; margin-bottom:14px; line-height:1.5;">
+          Install VLive directly to your Android, iPhone, iPad, or desktop home screen for a seamless, ultra-low latency, full-screen stage experience.
+        </p>
+
+        <div class="pwa-install-guide">
+          <div class="pwa-guide-item">
+            <div class="pwa-guide-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 16 0v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8z"/><line x1="7" y1="4" x2="9" y2="7"/><line x1="17" y1="4" x2="15" y2="7"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/></svg>
+            </div>
+            <div class="pwa-guide-info">
+              <strong>Android (Chrome / Edge / Samsung)</strong>
+              <span>Tap the three dots <strong>(⋮)</strong> menu &rarr; select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</span>
+            </div>
+          </div>
+
+          <div class="pwa-guide-item">
+            <div class="pwa-guide-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </div>
+            <div class="pwa-guide-info">
+              <strong>iPhone / iPad (Safari)</strong>
+              <span>Tap the Share icon <strong>(⎙ / ⎋)</strong> &rarr; scroll down and select <strong>"Add to Home Screen"</strong>.</span>
+            </div>
+          </div>
+
+          <div class="pwa-guide-item">
+            <div class="pwa-guide-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="pwa-guide-info">
+              <strong>Desktop (Chrome / Edge)</strong>
+              <span>Click the <strong>Install icon (⊕)</strong> on the right side of the browser URL address bar.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px;">
+        <span style="font-size:11px; color:#888888;">Made by Goldee</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-primary" id="btnTriggerNativeInstall" style="display:none; align-items:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Install Now</span>
+          </button>
+          <button class="btn-tool-action" id="btnGotItPwaModal">Got It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+# ====================================================================
+# VLive .gitignore
+# ====================================================================
+
+# Build output directories
+/build/
+/build_*/
+/bin/
+/out/
+/x64/
+/Debug/
+/Release/
+
+# Intermediate compiler artifacts
+*.obj
+*.o
+*.exp
+*.ilk
+*.pdb
+*.idb
+*.d
+*.log
+*.tlog
+
+# Distribution archives and root compiled binaries (hosted on GitHub Releases)
+/VLive.exe
+/VLive_Final_Distribution_x64.zip
+/dist/
+
+# Visual Studio & VS Code IDE files
+/.vs/
+/.vscode/
+*.vcxproj.user
+*.suo
+*.user
+CMakeSettings.json
+*.sln.docstates
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS metadata
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
